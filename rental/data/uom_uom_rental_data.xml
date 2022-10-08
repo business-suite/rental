@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="rental_tenure_uom_categ" model="uom.category">
+            <field name="name">Rental Tenure</field>
+        </record>
+
+        <record id="rental_days_uom" model="uom.uom">
+            <field name="name">Day(s)</field>
+            <field name="active" eval="True"/>
+            <field name="is_rental_uom" eval="True"/>
+            <field name="duration_unit">days</field>
+            <field name="category_id" ref="rental_tenure_uom_categ"/>
+            <field name="uom_type">reference</field>
+            <field name="rounding" eval="1.0"/>
+        </record>
+
+        <record id="rental_minutes_uom" model="uom.uom">
+            <field name="name">Minute(s)</field>
+            <field name="active" eval="True"/>
+            <field name="is_rental_uom" eval="True"/>
+            <field name="duration_unit">minutes</field>
+            <field name="category_id" ref="rental_tenure_uom_categ"/>
+            <field name="uom_type">smaller</field>
+            <field name="rounding" eval="1.0"/>
+        </record>
+
+        <record id="rental_hours_uom" model="uom.uom">
+            <field name="name">Hours(s)</field>
+            <field name="active" eval="True"/>
+            <field name="is_rental_uom" eval="True"/>
+            <field name="duration_unit">hours</field>
+            <field name="category_id" ref="rental_tenure_uom_categ"/>
+            <field name="uom_type">smaller</field>
+            <field name="rounding" eval="1.0"/>
+        </record>
+
+        <record id="rental_weeks_uom" model="uom.uom">
+            <field name="name">Week(s)</field>
+            <field name="active" eval="True"/>
+            <field name="is_rental_uom" eval="True"/>
+            <field name="duration_unit">weeks</field>
+            <field name="category_id" ref="rental_tenure_uom_categ"/>
+            <field name="uom_type">bigger</field>
+            <field name="rounding" eval="1.0"/>
+        </record>
+
+        <record id="rental_months_uom" model="uom.uom">
+            <field name="name">Month(s)</field>
+            <field name="active" eval="True"/>
+            <field name="is_rental_uom" eval="True"/>
+            <field name="duration_unit">months</field>
+            <field name="category_id" ref="rental_tenure_uom_categ"/>
+            <field name="uom_type">bigger</field>
+            <field name="rounding" eval="1.0"/>
+        </record>
+
+        <record id="rental_years_uom" model="uom.uom">
+            <field name="name">Year(s)</field>
+            <field name="active" eval="True"/>
+            <field name="is_rental_uom" eval="True"/>
+            <field name="duration_unit">years</field>
+            <field name="category_id" ref="rental_tenure_uom_categ"/>
+            <field name="uom_type">bigger</field>
+            <field name="rounding" eval="1.0"/>
+        </record>
+
+    </data>
+</odoo>

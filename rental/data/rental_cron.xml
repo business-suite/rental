@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~ SCHEDULAR ACTION ~~~~~~~~~~~~~~~~~~~~~~ -->
+        <record forcecreate="True" model="ir.cron" id="do_expire_rental_contract_scheduler">
+            <field name="name">Scheduler To Make Rental Contract Expired</field>
+            <field name="model_id" ref="model_rental_order_contract"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_method_to_make_expired_contract()</field>
+            <field name="user_id" ref="base.user_root"/>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+            <field name="doall" eval="True"/>
+        </record>
+    </data>
+</odoo>

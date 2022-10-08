@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="businesssuite_rental_cancel_reason_wizard_form_view" model="ir.ui.view">
+            <field name="name">rental.cancel.wizard.form</field>
+            <field name="model">rental.reason.wizard</field>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <form string="Contract Cancel Reason">
+                    <group>
+                        <field name="rental_contract_id" invisible="1"/>
+                        <field name="reason_id" required="1" placeholder="Select reason..."/>
+                        <field name="additional_comment" placeholder="Additional Comment..."/>
+                    </group>
+                    <footer>
+                        <button string="Cancel Now" name="do_cancel" type="object" class="btn-primary"/>
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record id="businesssuite_rental_cancel_reason_wizard_action" model="ir.actions.act_window">
+            <field name="name">Cancel Reason</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">rental.reason.wizard</field>
+            <field name="binding_view_types">form</field>
+            <field name="target">new</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="businesssuite_rental_cancel_reason_wizard_form_view"/>
+        </record>
+    </data>
+</odoo>

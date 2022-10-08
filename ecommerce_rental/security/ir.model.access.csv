@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+rental_product_category_public,public_access_rental_product_category,businesssuite_rental.model_rental_product_category,,1,0,0,0
+product_uom_public,public_access_product_uom,businesssuite_rental.model_uom_uom,,1,0,0,0
+rental_product_agreement_public,public_access_rental_product_agreement,businesssuite_rental.model_rental_product_agreement,,1,0,0,0
+product_rental_tenure_public,public_access_product_rental_tenure,businesssuite_rental.model_product_rental_tenure,,1,0,0,0

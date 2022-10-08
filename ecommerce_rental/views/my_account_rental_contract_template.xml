@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+
+    <template id="rental_inherit_portal_order_page" inherit_id="sale.sale_order_portal_content">
+        <xpath expr="//section[@id='details']//td[@id='product_name']" position="inside">
+            <br t-if="line.is_rental_order"/>
+            <span class="badge badge-info" t-if="line.is_rental_order" style="font-size:11px;">
+                <span class=""> Tenure <t
+                        t-out="str(line.rental_tenure).rstrip('0').rstrip('.') if '.' in str(line.rental_tenure) else str(line.rental_tenure)"/>
+                    <t t-out="line.rental_uom_id.name"/> @
+                    <span t-field="line.price_unit" style="white-space: nowrap;"
+                          t-options="{'widget': 'monetary','display_currency': line.order_id.pricelist_id.currency_id}"/></span>
+                <t t-if="line.product_id.security_amount>0.0">
+                    + <span t-field="line.product_id.security_amount" style="white-space: nowrap;"
+                            t-options="{'widget': 'monetary','display_currency': line.order_id.pricelist_id.currency_id}"/>
+                    Security <span class="hidden-xs">Amount</span>
+                </t>
+            </span>
+        </xpath>
+    </template>
+
+    <template id="inherit_report_saleorder_document" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//span[@t-field='line.name']" position="after">
+            <br t-if="line.is_rental_order"/>
+            <span t-if="line.is_rental_order" style="font-size:11px;">
+                <span class=""> Tenure <t
+                        t-out="str(line.rental_tenure).rstrip('0').rstrip('.') if '.' in str(line.rental_tenure) else str(line.rental_tenure)"/>
+                    <t t-out="line.rental_uom_id.name"/> @
+                    <span t-field="line.price_unit" style="white-space: nowrap;"
+                          t-options="{'widget': 'monetary','display_currency': doc.pricelist_id.currency_id}"/></span>
+                <t t-if="line.product_id.security_amount>0.0">
+                    + <span t-field="line.product_id.security_amount" style="white-space: nowrap;"
+                            t-options="{'widget': 'monetary','display_currency': doc.pricelist_id.currency_id}"/>
+                    Security <span class="hidden-xs">Amount</span>
+                </t>
+            </span>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_my_rental_orders" name="Portal My Home : my rental orders entries"
+              inherit_id="portal.portal_my_home" priority="50">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-if="my_rental_orders_count" t-call="portal.portal_docs_entry">
+                <t t-set="title">Rental Orders</t>
+                <t t-set="url" t-value="'/my/rental/orders'"/>
+                <t t-set="count" t-value="my_rental_orders_count"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_rental_orders" name="My Rental Orders">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Rental Orders</t>
+            </t>
+            <t t-if="not rental_orders_obj">
+                <p>There are currently no Rental Orders for your account.</p>
+            </t>
+            <t t-if="rental_orders_obj" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th> Rental Order Id # </th>
+                        <th> Product </th>
+                        <th> Rental Tenure </th>
+                        <th> Duration </th>
+                        <th> Total </th>
+                        <th> Status </th>
+                    </tr>
+                </thead>
+                <t t-foreach="rental_orders_obj" t-as="rental_order">
+                    <tr class='clickable-row rental_order_row '
+                        data-href='url://my/rental/orders/#{rental_order.id}?#{keep_query()}'>
+                        <td>
+                            <a t-attf-href="/my/rental/orders/#{rental_order.id}?#{keep_query()}"><t
+                                    t-out="rental_order.rental_sequence"/></a>
+                        </td>
+                        <td>
+                            <t t-out="rental_order.product_id.name"/>
+                        </td>
+                        <td>
+                            <t t-out="rental_order.rental_tenure"/> <t t-out="rental_order.rental_uom_id.name"/>
+                        </td>
+                        <td>
+                            <t t-if="rental_order and rental_order.initial_start_time and rental_order.initial_end_time">
+                                <span t-field="rental_order.initial_start_time"
+                                      t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/> -
+                                <span t-field="rental_order.initial_end_time"
+                                      t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                            </t>
+                        </td>
+                        <td>
+                            <t t-out="rental_order.price_total"
+                               t-options='{"widget": "monetary", "display_currency": rental_order.currency_id}'/>
+                        </td>
+                        <td>
+                            <div t-set="status" t-value="rental_order.rental_state"/>
+                            <div t-if="status=='ordered'" class="badge badge-info">
+                                <i class="fa fa-shopping-cart" aria-hidden="true" style="margin-right:3px;"></i>
+                                <span t-out="status" style="font-size:12px;text-transform: capitalize;"/>
+                            </div>
+                            <div t-if="status=='confirm'" class="badge badge-success">
+                                <i class="fa fa-check fa-1x" style="margin-right:3px;"></i>
+                                <span t-out="status" style="font-size:12px;text-transform: capitalize;"/>
+                            </div>
+                            <div t-if="status=='in_progress'" class="badge badge-success">
+                                <i class="fa fa-history fa-1x" style="margin-right:3px;"></i>
+                                <span t-out="status" style="font-size:12px; text-transform: capitalize;"/>
+                            </div>
+                            <div t-if="status=='expired'" class="badge badge-danger">
+                                <span t-out="status" style="font-size:12px;text-transform: capitalize;"/>
+                            </div>
+                            <div t-if="status=='closed'" class="badge badge-secondary">
+                                <i class="fa fa-times fa-1x" style="margin-right:3px;"></i>
+                                <span t-out="status" style="font-size:12px;text-transform: capitalize;"/>
+                            </div>
+                            <div t-if="status=='cancel'" class="badge badge-secondary">
+                                <i class="fa fa-times fa-1x" style="margin-right:3px;"></i>
+                                <span t-out="status" style="font-size:12px;text-transform: capitalize;"/>
+                            </div>
+                        </td>
+                    </tr>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_my_home_menu_rental_orders"
+              name="Rental Orders" inherit_id="portal.portal_breadcrumbs" priority="40">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'rental_order'"
+                t-attf-class="breadcrumb-item #{'active ' if not customer_quote else ''}">
+                <a t-if="rental_orders" t-attf-href="/my/rental/orders?{{ keep_query() }}"> Rental Orders</a>
+                <t t-else="">Rental Orders</t>
+            </li>
+            <li t-if="rental_orders" class="breadcrumb-item active">
+                <t t-out="rental_orders.rental_sequence"/>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_rental_order_page" name="Rental Orders Description Page">
+        <t t-call="portal.portal_layout">
+            <div id="wrap">
+                <div class="card-body bg-white mb-2 mt-3">
+                    <t t-if="renew_success">
+                        <div class="alert alert-success">
+                            <b>Your rental contract has been renewed successfully, please complete the payment
+                                process.</b>
+                            <t t-set="url" t-value="rental_orders.invoice_lines.move_id[0].sudo().get_portal_url()"/>
+                            <a t-attf-href="#{url}" target="new"> Click to pay </a>
+                        </div>
+                    </t>
+                    <t t-if="renew_error and not renew_success">
+                        <div class="alert alert-danger">
+                            <b>Some error occurred, please contact the system admin.</b>
+                        </div>
+                    </t>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div id="introduction"
+                                 t-attf-class="pb-3 #{'card-header bg-white' if report_type == 'html' else ''}">
+                                <h2 class="my-0" style="display: inline;">
+                                    <span>Rental Orders</span>
+                                    <b><span t-field="rental_orders.rental_sequence"/></b>
+                                    <t t-set="status" t-value="rental_orders.rental_state"/>
+                                    <t t-if="status=='ordered'">
+                                        <span class="pull-right badge badge-info"><i class="fa fa-fw fa-shopping-cart"/>
+                                            Ordered</span>
+                                    </t>
+                                    <t t-if="status=='in_progress'">
+                                        <span class="pull-right badge badge-warning"><i class="fa fa-fw fa-history"/> In
+                                            Progress</span>
+                                    </t>
+                                    <t t-if="status=='confirm'">
+                                        <span class="pull-right badge badge-success"><i class="fa fa-fw fa-check"/>
+                                            Confirmed</span>
+                                    </t>
+                                    <t t-if="status=='closed'">
+                                        <span class="pull-right badge badge-secondary"><i class="fa fa-fw fa-times"/>
+                                            Closed</span>
+                                    </t>
+                                    <t t-if="status=='cancel'">
+                                        <span class="pull-right badge badge-danger"><i class="fa fa-fw fa-times"/>
+                                            Cancel</span>
+                                    </t>
+                                    <t t-if="status=='expired'">
+                                        <span class="pull-right badge badge-danger">Expired</span>
+                                    </t>
+                                    <span t-if="status=='expired'" class="rental_renew_form">
+                                        <t t-set="no_renew"
+                                           t-value="rental_orders.rental_contract_ids.filtered(lambda c:c.state != 'expired' )"/>
+                                        <div t-if="not no_renew" id="RentalRenewModal" class="modal fade" role="dialog">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <form action="/rental/order/renew" method="POST">
+                                                        <input type="hidden" name="csrf_token"
+                                                               t-att-value="request.csrf_token()"/>
+                                                        <input type="hidden" name="sale_order_line_id"
+                                                               t-att-value="rental_orders.id"/>
+                                                        <input type="hidden" name="is_rental_product" t-att-value="1"/>
+                                                        <div class="modal-header">
+                                                            <h3 class="text-primary mb0 mb0">
+                                                                Renew your rental order from here
+                                                            </h3>
+                                                            <button type="button" class="fa fa-times close"
+                                                                    data-dismiss="modal"></button>
+                                                        </div>
+                                                        <input name="product_id"
+                                                               t-att-value="rental_orders.product_id.id" type="hidden"/>
+                                                        <div class="modal-body">
+                                                            <div class="offset-md-1 col-md-10 portal_renew">
+                                                                <t t-call="businesssuite_ecommerce_rental.rental_inherit_product_price">
+                                                                    <t t-set="is_rental_product" t-value="True"/>
+                                                                    <t t-set="product"
+                                                                       t-value="rental_orders.product_id"/>
+                                                                    <t t-set="renew" t-value="1"/>
+                                                                </t>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-success"
+                                                                    id="add_to_cart"> Renew Now </button>
+                                                            <button id="login_modal_close" type="button"
+                                                                    class="btn btn-default" data-dismiss="modal">
+                                                                Cancel </button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a t-if="not no_renew" href="#" data-toggle="modal"
+                                           data-target="#RentalRenewModal" class="btn btn-primary btn-sm">Renew now</a>
+                                    </span>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="panel-body">
+                            <t t-call="businesssuite_ecommerce_rental.portal_rental_orders_report"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="oe_structure mb32"/>
+        </t>
+    </template>
+
+    <template id="portal_rental_orders_report" name="Rental Orders Portal Report">
+        <div class="container">
+            <div class="col-xs-5" name="customer_address">
+                <strong>Customer Address</strong>
+                <address t-field="rental_orders.order_partner_id"
+                         t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+            </div>
+        </div>
+        <div class="row mt32 mb32">
+            <div class="col-md-2 col-12">
+                <strong>Product:</strong>
+                <div>
+                    <a t-attf-href="/shop/rental/product/#{ slug(rental_orders.product_id.product_tmpl_id)}">
+                        <span t-field="rental_orders.product_id.name"/>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-2 col-12">
+                <strong>Ordered Qty:</strong>
+                <div>
+                    <span t-out="rental_orders.product_uom_qty"/>
+                </div>
+            </div>
+            <div class="col-md-2 col-12" t-if="rental_orders.create_date">
+                <strong>Sale Order:</strong>
+                <div>
+                    <a t-attf-href="/my/orders/#{rental_orders.order_id.id}?#{keep_query()}">
+                        <span t-field="rental_orders.order_id.name"/>
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-2 col-12" t-if="rental_orders.create_date">
+                <strong>Created On:</strong>
+                <div>
+                    <span t-field="rental_orders.create_date"
+                          t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                </div>
+            </div>
+            <div class="col-md-2 col-12" t-if="rental_orders.total_deposit_security_amount">
+                <strong>Security Deposited:</strong>
+                <mark>
+                    <span t-field="rental_orders.total_deposit_security_amount"
+                          t-options='{"widget": "monetary", "display_currency": rental_orders.currency_id}'/>
+                </mark>
+            </div>
+            <div class="col-md-2 col-12">
+                <a target="_blank"
+                   t-attf-href="/web/content?model=rental.product.agreement&amp;field=agreement_file&amp;filename_field=filename&amp;id={{ rental_orders.product_id.rental_agreement_id.id }}"
+                   title="Click to view product agreement">
+                    <strong>Click to view product agreement</strong>
+                </a>
+            </div>
+        </div>
+        <div class="row mt32" t-if="len(rental_orders.rental_contract_ids)>1">
+            <div class="col-md-6 col-12" t-if="rental_orders.initial_start_time">
+                <strong class="d-block mb-1 text-info"><h3>Initial Rental Details</h3></strong>
+                <ul class="list-group mb-4">
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">Start Time</span></b>
+                        <span t-field="rental_orders.initial_start_time"
+                              t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                    </span>
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">End Time</span></b>
+                        <span t-field="rental_orders.initial_end_time"
+                              t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                    </span>
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">Tenure</span></b>
+                        <span><t t-out="rental_orders.rental_tenure"/> <t
+                                t-out="rental_orders.rental_uom_id.name"/></span>
+                    </span>
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">Rental Contract</span></b>
+                        <span t-field="rental_orders.inital_rental_contract_id"/>
+                    </span>
+                </ul>
+            </div>
+            <div class="col-md-6 col-12" t-if="rental_orders.current_start_time">
+                <strong class="d-block mb-1 text-info"><h3>Current Rental Details</h3></strong>
+                <ul class="list-group mb-4">
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">Start Time</span></b>
+                        <span t-field="rental_orders.current_start_time"
+                              t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                    </span>
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">End Time</span></b>
+                        <span t-field="rental_orders.current_end_time"
+                              t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                    </span>
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">Tenure</span></b>
+                        <span><t t-out="rental_orders.current_rental_tenure"/> <t
+                                t-out="rental_orders.rental_uom_id.name"/></span>
+                    </span>
+                    <span class="list-group-item list-group-item-action d-flex flex-wrap align-items-center justify-content-between py-2 px-3">
+                        <b><span class="mr-lg-3">Rental Contract</span></b>
+                        <span t-field="rental_orders.current_rental_contract_id"/>
+                    </span>
+                </ul>
+            </div>
+        </div>
+        <a t-if="len(rental_orders.rental_contract_ids)>1" class="text-info mb16"
+           data-toggle="collapse" href="#rental_accor" role="button" aria-expanded="false"
+           aria-controls="rental_accor">
+            Click to view complete rental contract details</a>
+        <h3 t-if="len(rental_orders.rental_contract_ids)==1" class="text-info">Rental Contract Details</h3>
+        <div t-att-class="'collapse' if len(rental_orders.rental_contract_ids)>1 else ''" id="rental_accor">
+            <table class="table table-striped">
+                <thead class="bg-info">
+                    <tr>
+                        <th>Contract</th>
+                        <th>Rental Tenure</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th class="text-right">Unit Price</th>
+                        <th class="text-right">Taxes</th>
+                        <th class="text-right">Total</th>
+                        <th> State </th>
+                        <th> Invoice </th>
+                    </tr>
+                </thead>
+                <tbody class="o_portal_report_tbody">
+                    <t t-foreach="rental_orders.rental_contract_ids" t-as="contract">
+                        <tr>
+                            <td><span t-field="contract.name"/></td>
+                            <td>
+                                <span><t t-out="contract.rental_tenure"/><t t-out="contract.rental_uom_id.name"/></span>
+                            </td>
+                            <td>
+                                <span t-field="contract.start_time"
+                                      t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                            </td>
+                            <td>
+                                <span t-field="contract.end_time"
+                                      t-options='{"widget": "datetime" , "format": "d MMM, y hh:mm"}'/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="contract.price_unit"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-out="', '.join(map(lambda x: (x.name or x.description), contract.tax_ids))"/>
+                            </td>
+                            <td class="text-right">
+                                <span t-field="contract.price_total"
+                                      t-options='{"widget": "monetary", "display_currency": contract.currency_id}'/>
+                            </td>
+                            <td><span t-field="contract.state" style="text-decoration:capitalize;"/></td>
+                            <td>
+                                <t t-foreach="contract.rental_invoice_ids" t-as="inv">
+                                    <a t-attf-href="/my/invoices/#{inv.id}" target="new">
+                                        <span t-out="inv.name"/>
+                                    </a>
+                                </t>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </template>
+
+</odoo>

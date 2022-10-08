@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rental_reason,rental.reason.public,model_rental_reason,,1,0,0,0
+access_rental_tenure,product.rental.tenure.public,model_product_rental_tenure,,1,0,0,0
+access_rental_product_category,access_rental_product_category,model_rental_product_category,,1,0,0,0
+access_rental_product_agreement,rental.product.agreement,model_rental_product_agreement,,1,0,0,0
+access_rental_order_contract_portal,rental.order.contract.portal,model_rental_order_contract,base.group_portal,1,1,0,0
+access_rental_order_contract_salesman,rental.order.contract.salesman,model_rental_order_contract,sales_team.group_sale_salesman,1,1,1,0
+access_rental_tenure_sale_manager,product.rental.tenure.sale_manager,model_product_rental_tenure,sales_team.group_sale_manager,1,1,1,1
+access_rental_reason_sale_manager,rental.reason.public,model_rental_reason,sales_team.group_sale_manager,1,1,1,1
+access_rental_product_agreement_sale_manager,rental.product.agreement.sale_manager,model_rental_product_agreement,sales_team.group_sale_manager,1,1,1,1
+access_rental_product_category_sale_manager,access_rental_product_category_sale_manager,model_rental_product_category,sales_team.group_sale_manager,1,1,1,1
+access_rental_order_wizard,access_rental_order_wizard,model_businesssuite_rental_order_wizard,base.group_user,1,1,1,1
+access_rental_order_renew_wizard,access_rental_order_renew_wizard,model_rental_order_renew_wizard,base.group_user,1,1,1,0
+access_rental_reason_wizard,access_rental_reason_wizard,model_rental_reason_wizard,base.group_user,1,1,1,1

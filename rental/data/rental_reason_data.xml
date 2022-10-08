@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <record id="rental_reason_demo_data_expired" model="rental.reason">
+            <field name="name">Rental Duration Expired</field>
+            <field name="description">Rental duration has been expired.</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="rental_reason_demo_data_closed" model="rental.reason">
+            <field name="name">Contract Closed</field>
+            <field name="description">Rental product(s) has been received from customer that's why contract has been
+                closed.
+            </field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="rental_reason_demo_data_cancelled" model="rental.reason">
+            <field name="name">Contract Cancelled</field>
+            <field name="description">Rental contract has been cancelled.</field>
+            <field name="sequence">1</field>
+        </record>
+    </data>
+</odoo>

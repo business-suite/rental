@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="inherit_rental_product_form_view">
+            <field name="name">Website Sale Rental Product Form</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="website_sale.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet//div[@name='button_box']" position="inside">
+                    <field name="website_published" invisible="1"/>
+                    <button name="toggle_website_published_rental" type="object"
+                            class="btn" string="Published"
+                            icon="fa-globe text-success" attrs="{'invisible':[('website_published', '=', False)]}"/>
+                    <button name="toggle_website_published_rental" type="object"
+                            class="btn" string="Unpublished"
+                            icon="fa-globe text-danger" attrs="{'invisible':[('website_published', '=', True)]}"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="inherit_rental_product_template_view_form" model="ir.ui.view">
+            <field name="name">rental.product.template.common.form.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="businesssuite_rental.inherit_rental_product_template_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='rent']//field[@name='rental_tenure_ids']//field[@name='tenure_value']"
+                       position="before">
+                    <field name="sequence" widget="handle"/>
+                </xpath>
+                <xpath expr="//page[@name='rent']//field[@name='rental_tenure_ids']//field[@name='rent_price']"
+                       position="after">
+                    <field name="is_default"/>
+                    <field name="max_tenure_value"/>
+                </xpath>
+                <xpath expr="//page[@name='rent']//field[@name='rental_tenure_ids']" position="after">
+                    <group>
+                        <group>
+                            <field name="rental_tenure_id"
+                                   help="Select starting tenure for this product to show in rental page on website."
+                                   domain="[('product_tmpl_id','=',active_id),('is_default','=',True)]"
+                                   options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+        <record id="inherit_rental_product_category_view_form" model="ir.ui.view">
+            <field name="name">rental.product.category.form.inherit</field>
+            <field name="model">rental.product.category</field>
+            <field name="inherit_id" ref="businesssuite_rental.rental_product_category_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet//field[@name='hide_all_product']" position="after">
+                    <field name="public_categ_ids" widget="many2many_tags"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

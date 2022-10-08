@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="rental_order_wizard_view_form" model="ir.ui.view">
+        <field name="name">Rental Order Wizard</field>
+        <field name="model">businesssuite.rental.order.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="order_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="product_id" placeholder="Rental Product" required="1"/>
+                    <field name="unit_security_amount"
+                           attrs="{'invisible':[('product_id','=', False)], 'required':[('product_id','!=', False)]}"
+                           widget="monetary"/>
+                    <field name="quantity" placeholder="Quantity" required="1"/>
+                    <field name="rental_tenure_type" widget="radio" options="{'horizontal': true}" string="Tenure Type"
+                           required="1"/>
+                    <field name="rental_tenure_ids_domain" invisible="1"/>
+                    <field name="rental_tenure_id" placeholder="Rental Tenure"
+                           domain="[('id','in',rental_tenure_ids_domain)]"
+                           attrs="{'required':[('rental_tenure_type','=', 'standard')], 'invisible':[('rental_tenure_type','=', 'custom')],}"
+                           options="{'horizontal': true}" string="Rental Scheme" widget="radio"/>
+                    <label for="rental_tenure" attrs="{'invisible':[('rental_tenure_type','=', 'standard')]}"/>
+                    <div class="oe_inline" style="display:flex;"
+                         attrs="{'invisible':[('rental_tenure_type','=', 'standard')]}">
+                        <span>
+                            <field name="rental_tenure" required="1"/>
+                        </span>
+                        <span style="margin-left: 10px; font-weight: 600;">
+                            <field name="rental_uom_ids_domain" invisible="1"/>
+                            <field name="rental_uom_id" options="{'no_create' : True}" required="1"
+                                   domain="[('id','in',rental_uom_ids_domain)]"/>
+                        </span>
+                    </div>
+                </group>
+                <footer>
+                    <button name="action_add_rental_product" string="Add Rental Product" type="object"
+                            class="oe_highlight"/>
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="rental_order_wizard_action" model="ir.actions.act_window">
+        <field name="name">Add Rental Product</field>
+        <field name="res_model">businesssuite.rental.order.wizard</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+    </record>
+
+</odoo>

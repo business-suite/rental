@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Sequences for rental.order.contract -->
+        <record id="sequence_rental_order_contract" model="ir.sequence">
+            <field name="name">Rental Order Contract</field>
+            <field name="code">rental.order.contract</field>
+            <field name="prefix">ROC</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Sequences for sale.order.line -->
+        <record id="sequence_rental_sol" model="ir.sequence">
+            <field name="name">Rental Order</field>
+            <field name="code">rental.sale.order.line</field>
+            <field name="prefix">RO</field>
+            <field name="padding">3</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

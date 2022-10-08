@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="businesssuite_rental.rental_contract_report">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="doc">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <div class="oe_structure"/>
+                            <div class="row">
+                                <div class="col-6">
+                                    <t t-if="doc.sale_order_line_id.order_id.partner_shipping_id == doc.sale_order_line_id.order_id.partner_invoice_id and doc.sale_order_line_id.order_id.partner_invoice_id != doc.sale_order_line_id.order_id.partner_id">
+                                        <strong t-if="doc.sale_order_line_id.order_id.partner_shipping_id == doc.sale_order_line_id.order_id.partner_invoice_id">
+                                            Invoicing and shipping address:</strong>
+                                        <strong t-if="doc.sale_order_line_id.order_id.partner_shipping_id != doc.sale_order_line_id.order_id.partner_invoice_id">
+                                            Invoicing address:</strong>
+                                        <div t-field="doc.sale_order_line_id.order_id.partner_invoice_id"
+                                             t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;], &quot;no_marker&quot;: True, &quot;phone_icons&quot;: True}"/>
+                                        <div t-if="doc.sale_order_line_id.order_id.partner_shipping_id != doc.sale_order_line_id.order_id.partner_invoice_id"
+                                             class="mt8">
+                                            <strong>Shipping address:</strong>
+                                            <div t-field="doc.sale_order_line_id.order_id.partner_shipping_id"
+                                                 t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;, &quot;phone&quot;], &quot;no_marker&quot;: True, &quot;phone_icons&quot;: True}"/>
+                                        </div>
+                                    </t>
+                                </div>
+                                <div class="col-5 col-offset-1">
+                                    <div t-field="doc.sale_order_line_id.order_id.partner_id"
+                                         t-options="{&quot;widget&quot;: &quot;contact&quot;, &quot;fields&quot;: [&quot;address&quot;, &quot;name&quot;], &quot;no_marker&quot;: True}"/>
+                                    <p t-if="doc.sale_order_line_id.order_id.partner_id.vat"><t
+                                            t-esc="doc.sale_order_line_id.order_id.company_id.country_id.vat_label or 'TIN'"/>
+                                        : <span t-field="doc.sale_order_line_id.order_id.partner_id.vat"/></p>
+                                </div>
+                            </div>
+
+                            <h2>
+                                <span> Contract # </span>
+                                <span t-field="doc.name"/>
+                            </h2>
+
+                            <div class="row mt32 mb32" id="informations">
+                                <div t-if="doc.rental_tenure and doc.rental_uom_id" class="col-3">
+                                    <strong>Tenure:</strong>
+                                    <span t-field="doc.rental_tenure"/> &#160; <span t-field="doc.rental_uom_id.name"/>
+                                </div>
+                                <div t-if="doc.start_time" class="col-3">
+                                    <strong>Start Time:</strong>
+                                    <p t-field="doc.start_time"
+                                       t-field-options='{"widget": "datetime" , "format": "dd/MM/yyyy,hh:mm"}'/>
+                                </div>
+                                <div t-if="doc.end_time" class="col-3">
+                                    <strong>End Time:</strong>
+                                    <p t-field="doc.end_time"
+                                       t-field-options='{"widget": "datetime" , "format": "dd/MM/yyyy,hh:mm"}'/>
+                                </div>
+                                <div t-if="doc.sale_order_line_id.order_id.date_order" class="col-3">
+                                    <strong>Create Date:</strong>
+                                    <p t-field="doc.sale_order_line_id.order_id.date_order"
+                                       t-field-options='{"widget": "datetime" , "format": "dd/MM/yyyy,hh:mm"}'/>
+                                </div>
+
+                            </div>
+                            <div class="row mt32 mb32" id="informations">
+                                <div t-if="doc.rental_sequence" class="col-3">
+                                    <strong>Rental Order:</strong>
+                                    <p t-field="doc.rental_sequence"/>
+                                </div>
+                                <div t-if="doc.sale_order_line_id.order_id" class="col-3">
+                                    <strong>Sale Order:</strong>
+                                    <p t-field="doc.sale_order_line_id.order_id.name"/>
+                                </div>
+                                <div class="col-3">
+                                    <strong>Contract State:</strong>
+                                    <p t-field="doc.state"/>
+                                </div>
+                                <div class="col-3">
+                                    <strong>Security Amount:</strong>
+                                    <p t-field="doc.total_deposit_security_amount"/>
+                                </div>
+                            </div>
+
+
+                            <t t-set="display_discount" t-value="doc.sale_order_line_id"/>
+
+                            <table class="table table-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th class="text-right">Quantity</th>
+                                        <th class="text-right">Unit Price</th>
+                                        <th t-if="display_discount" class="text-right"
+                                            groups="product.group_discount_per_so_line">Disc.(%)</th>
+                                        <th class="text-right">Taxes</th>
+                                        <th class="text-right" groups="account.group_show_line_subtotals_tax_excluded">
+                                            Amount</th>
+                                        <th class="text-right price_tax_included"
+                                            groups="account.group_show_line_subtotals_tax_included">Total Price</th>
+                                        <th class="text-right">Rental State</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="sale_tbody">
+                                    <tr>
+                                        <td><span t-field="doc.sale_order_line_id.name"/></td>
+                                        <td class="text-right">
+                                            <span t-field="doc.sale_order_line_id.product_uom_qty"/>
+                                            <span t-field="doc.sale_order_line_id.product_uom" groups="uom.group_uom"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="doc.sale_order_line_id.price_unit"/>
+                                        </td>
+                                        <td t-if="display_discount" class="text-right"
+                                            groups="product.group_discount_per_so_line">
+                                            <span t-field="doc.sale_order_line_id.discount"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-esc="', '.join(map(lambda x: (x.description or x.name), doc.sudo().sale_order_line_id.tax_id))"/>
+                                        </td>
+                                        <td class="text-right" groups="account.group_show_line_subtotals_tax_excluded">
+                                            <span t-field="doc.sale_order_line_id.price_subtotal"
+                                                  t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.sale_order_line_id.order_id.pricelist_id.currency_id}"/>
+                                        </td>
+                                        <td class="text-right" groups="account.group_show_line_subtotals_tax_included">
+                                            <span t-field="doc.sale_order_line_id.price_total"
+                                                  t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.sale_order_line_id.order_id.pricelist_id.currency_id}"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="doc.sale_order_line_id.rental_state"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="clearfix">
+                                <div class="row" name="total">
+                                    <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ml-auto">
+                                        <table class="table table-condensed" style="min-width: 200px;max-width: 350px;">
+                                            <tr class="border-black" style="border-bottom:1px solid #dddddd;">
+                                                <td><strong>Subtotal</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="doc.sale_order_line_id.price_subtotal"
+                                                          t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.sale_order_line_id.order_id.pricelist_id.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                            <tr class="">
+                                                <td><strong>Taxes</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="doc.sale_order_line_id.price_tax"
+                                                          t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.sale_order_line_id.order_id.pricelist_id.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                            <tr class="border-black">
+                                                <td><strong>Total</strong></td>
+                                                <td class="text-right">
+                                                    <span t-field="doc.sale_order_line_id.price_total"
+                                                          t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: doc.sale_order_line_id.order_id.pricelist_id.currency_id}"/>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="oe_structure"/>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <record id="rental_contract_appoint_report" model="ir.actions.report">
+            <field name="name">Rental Contract</field>
+            <field name="model">rental.order.contract</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">businesssuite_rental.rental_contract_report</field>
+            <field name="report_file">businesssuite_rental.rental_contract_report</field>
+            <field name="print_report_name">'%s report.pdf' % (object.name)</field>
+            <field name="binding_model_id" ref="model_rental_order_contract"/>
+            <field name="binding_type">report</field>
+        </record>
+    </data>
+</odoo>

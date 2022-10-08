@@ -1,0 +1,143 @@
+/* Copyright (c) 2016-Present Webkul Software Pvt. Ltd. (<https://webkul.com/>) */
+/* See LICENSE file for full copyright and licensing details. */
+/* License URL : https://store.webkul.com/license.html/ */
+
+.rental_product_section {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 21px;
+    min-height: 56px;
+    z-index: 5;
+    overflow: hidden;
+    padding: 7px 10px 6px 10px;
+    border-top: 1px solid rgb(221, 221, 221);
+    background: rgba(255, 255, 255, 0.75)
+}
+
+.thumbnail_div {
+    display: block;
+    padding: 4px;
+    margin-bottom: 20px;
+    line-height: 1.42857143;
+    background-color: #ffffff;
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+    -webkit-transition: border 0.2s ease-in-out;
+    -o-transition: border 0.2s ease-in-out;
+    transition: border 0.2s ease-in-out;
+}
+
+.price_info .popover {
+    font-weight: bold;
+}
+
+.price_info .popover.right .arrow:after {
+    border-right-color: #333;
+    background-color: #f8f8f8;
+}
+
+
+.invalid {
+    border: 2px solid #a94447 !important;
+    color: #a94447 !important;
+    box-shadow: 0 0 3px #f00 !important;
+}
+
+
+.valid {
+    border: 2px solid #3c753d !important;
+    color: #3c753d !important;
+    box-shadow: 0 0 3px #008000 !important;
+}
+
+.rental_loader {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url(/odoo_website_sale_rental/static/src/img/rental_loader.gif) center no-repeat rgba(255, 255, 255, 0.5);
+    text-shadow: 0 1px 1px white;
+}
+
+/*===========================================*/
+
+.tenure_radio label {
+    width: 100%;
+    border-radius: 3px;
+    border: 1px solid #D1D3D4;
+    font-weight: normal;
+}
+
+.tenure_radio input[type="radio"]:empty {
+    display: none;
+}
+
+.tenure_radio input[type="radio"]:empty ~ label {
+    position: relative;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    margin-bottom: 0px;
+    font-size: 15px;
+    padding: 6px;
+    padding-left: 24px;
+    border-color: #eeeeee;
+    opacity: 0.8;
+    box-shadow: 0px 0px 7px 0px rgba(0, 0, 0, 0.08);
+}
+
+.tenure_radio input[type="radio"]:empty ~ label:before {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    content: '';
+    width: 0.4em;
+    font-size: 20px;
+    background: #D1D3D4;
+    border-radius: 3px 0 0 3px;
+    color: #C2C2C2;
+}
+
+.tenure_radio input[type="radio"]:hover:not(:checked) ~ label {
+    background-color: #88888814;
+}
+
+.tenure_radio input[type="radio"]:hover:not(:checked) ~ label:before {
+    content: '';
+    color: #C2C2C2;
+}
+
+.tenure_radio input[type="radio"]:checked ~ label {
+    background-color: #dae0ee;
+}
+
+.tenure_radio input[type="radio"]:checked ~ label:before {
+    content: '';
+    color: #333;
+    background-color: #ccc;
+}
+
+.tenure_radio input[type="radio"]:focus ~ label:before {
+    box-shadow: 0 0 0 3px #999;
+}
+
+.tenure_radio-success {
+    padding: 2%;
+    margin: 0;
+}
+
+.tenure_radio-success input[type="radio"]:checked ~ label:before {
+    color: #fff;
+    background-color: #387ab7;
+}
+
+.tenure_radio-success input[type="radio"]:checked ~ div {
+    border: 1px solid #387ab7 !important;
+}

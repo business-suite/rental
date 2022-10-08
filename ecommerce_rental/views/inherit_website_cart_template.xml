@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+
+        <template id="inherit_total" inherit_id="website_sale.total" name="Show Security Amount">
+            <xpath expr="//div[@id='cart_total']" position="before">
+                <t t-set="website_sale_order" t-value="website.sale_get_order()"/>
+                <t t-set="rental_prod_added_in_cart"
+                   t-value="website_sale_order.website_order_line.filtered(lambda p: p.is_rental_order) if website_sale_order else request.env['sale.order.line']"/>
+                <div class="mt8 mb8"
+                     t-if="rental_prod_added_in_cart and website_sale_order.total_deposit_security_amount>0.0"
+                     id="order_total_security" style="font-weight:bold;margin-left:14px;font-size:15px;"
+                     title="Security amount will be refundable after the tenure period.">
+                    <span class="text-default">Refundable Security Amount : </span>
+                    <span class="text-muted" t-field="website_sale_order.total_deposit_security_amount"
+                          style="white-space: nowrap;"
+                          t-options="{'widget': 'monetary','from_currency': website_sale_order.pricelist_id.currency_id,'display_currency': website.currency_id}"/>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="cart_check_rental_prod_line" inherit_id="website_sale.cart_lines" name="Rental Product Cart Lines"
+                  priority="50">
+            <xpath expr="//td[hasclass('td-product_name')]" position="inside">
+                <span t-if="line.is_rental_order" class="badge badge-info" style="font-size:11px;">
+                    <span class=""> Tenure <t
+                            t-out="str(line.rental_tenure).rstrip('0').rstrip('.') if '.' in str(line.rental_tenure) else str(line.rental_tenure)"/> <t
+                            t-out="request.website._get_rental_tenure_short_name(line.rental_uom_id.duration_unit, line.rental_tenure)"/>
+                        @
+                        <span t-field="line.price_unit" style="white-space: nowrap;"
+                              t-options="{'widget': 'monetary','display_currency': website.currency_id}"/>
+                    </span>
+                    <t t-if="line.product_id.security_amount>0.0">
+                        + <span
+                            t-out="request.website.get_website_price(line.product_id,line.product_id.security_amount)"
+                            style="white-space: nowrap;"
+                            t-options="{'widget': 'monetary','display_currency': website.currency_id}"/>
+                        Security <span class="hidden-xs">Amount</span>
+                    </t>
+                </span>
+            </xpath>
+        </template>
+
+        <template id="cart_check_rental_prod_linecart_summary" inherit_id="website_sale.cart_summary"
+                  name="Rental Product Cart Summary" priority="50">
+            <xpath expr="//td[hasclass('td-product_name')]/div" position="inside">
+                <a t-if="line.is_rental_order" href="#\" title="Rental Product" data-toggle="popover"
+                   data-trigger="click" data-content="Some content"
+                   class="fa fa-info-circle text-primary" style="text-decoration:None;"
+                   t-att-data-content="request.website.get_cartline_popover_content(line.id)"></a>
+            </xpath>
+        </template>
+
+        <template id="website_rental_inherit_continue_shopping" inherit_id="website_sale.cart" customize_show="True"
+                  name="Select Rental Products Button">
+            <xpath expr="//a[@href='/shop']" position="before">
+                <a href="/shop/rental" class="btn btn-default mb32 p-0" role="button">
+                    <span class="btn btn-secondary d-none d-xl-inline-block"><span class="fa fa-chevron-left"/> Rental
+                        Products</span>
+                </a>
+            </xpath>
+        </template>
+
+        <template id="website_rental_inherit_cart_popover" inherit_id="website_sale.cart_line_product_link"
+                  name="Rental Cart Popover">
+            <xpath expr="//a" position="replace">
+                <t t-if="line.is_rental_order">
+                    <a t-att-href="('/shop/rental/product/%s' % (line.product_id.product_tmpl_id.id))">
+                        <t t-raw="0"/>
+                    </a>
+                </t>
+                <t t-else="">
+                    <a t-att-href="line.product_id.website_url">
+                        <t t-raw="0"/>
+                    </a>
+                </t>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>

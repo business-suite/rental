@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <!-- Rental Menu -->
+        <template id="rental_link_in_header" inherit_id="website.template_header_default" name="Show Rental"
+                  customize_show="True" active="True">
+            <xpath expr="//t[@t-foreach='website.menu_id.child_id']" position="after">
+                <li class="nav-item">
+                    <a class="nav-link" role="menuitem" href="/shop/rental">Rental</a>
+                </li>
+            </xpath>
+        </template>
+
+        <!-- Rental Categories row -->
+        <template id="rental_inherit_products" inherit_id="website_sale.products">
+            <xpath expr="//div[@id='wrap']//div[hasclass('o_wsale_products_main_row')][1]" position="before">
+                <div t-if="is_rental_page and rental_categs and len(rental_categs)>1"
+                     class="container mt16 mb16 bg-light">
+                    <div class="d-none d-xl-block">
+                        <ul class="nav nav-pills nav-justified ">
+                            <li t-att-class="'nav-item active show' if rental_categ == 0 else 'nav-item'">
+                                <a class="nav-link"
+                                   t-att-href="keep('/shop/rental', rental_categ=0, category=0)">Home</a>
+                            </li>
+                            <t t-foreach="rental_categs" t-as="c">
+                                <li t-att-class="'nav-item active show' if c.id == int(rental_categ or 0) else 'nav-item'">
+                                    <a class="nav-link"
+                                       t-att-href="keep('/shop/rental', rental_categ='%s' % c.id, category=0)"
+                                       t-field="c.name"></a>
+                                </li>
+                            </t>
+                        </ul>
+                    </div>
+                    <div class="d-block d-md-none d-lg-none d-xl-none">
+                        <ul class=" nav nav-pills">
+                            <li t-att-class="'nav-item active show' if rental_categ == 0 else 'nav-item'">
+                                <a class="nav-link"
+                                   t-att-href="keep('/shop/rental', rental_categ=0, category=0)">Home</a>
+                            </li>
+                            <t t-foreach="rental_categs" t-as="c">
+                                <li t-att-class="'nav-item active show' if c.id == int(rental_categ or 0) else 'nav-item'">
+                                    <a class="nav-link"
+                                       t-att-href="keep('/shop/rental', rental_categ='%s' % c.id, category=0)"
+                                       t-field="c.name"></a>
+                                </li>
+                            </t>
+                        </ul>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_products_item" inherit_id="website_sale.products_item" name="Rental Products item">
+            <xpath expr="//div[hasclass('oe_product_image')]/input[@name='csrf_token']" position="before">
+                <a t-if="product.rental_ok and not is_rental_page" class="badge badge-success pull-right"
+                   style="z-index: 10;position: relative;" title="Click to view product rental scheme"
+                   t-att-href="keep('/shop/rental/product/%s' % slug(product), page=(pager['page']['num'] if pager['page']['num']&gt;1 else None))">
+                    For Rent
+                </a>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_product_image')]/a" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/product/%s' % slug(product), page=(
+                    pager['page']['num'] if pager['page']['num'] &gt; 1 else None)) if is_rental_page else keep(
+                    '/shop/product/%s' % slug(product),
+                    page=(pager['page']['num'] if pager['page']['num'] &gt; 1 else None))</attribute>
+            </xpath>
+            <xpath expr="//a[hasclass('o_product_link')]" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/product/%s' % slug(product), page=(
+                    pager['page']['num'] if pager['page']['num'] &gt; 1 else None)) if is_rental_page else keep(
+                    '/shop/product/%s' % slug(product),
+                    page=(pager['page']['num'] if pager['page']['num'] &gt; 1 else None))</attribute>
+            </xpath>
+            <xpath expr="//form[hasclass('oe_product_cart')]//span[@t-field='image_holder.image_1920']/.."
+                   position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/product/%s' % slug(product), page=(
+                    pager['page']['num'] if pager['page']['num'] &gt; 1 else None)) if is_rental_page else keep(
+                    '/shop/product/%s' % slug(product),
+                    page=(pager['page']['num'] if pager['page']['num'] &gt; 1 else None))</attribute>
+            </xpath>
+            <xpath expr="//a[@t-field='product.name']" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/product/%s' % slug(product), page=(
+                    pager['page']['num'] if pager['page']['num'] &gt; 1 else None)) if is_rental_page else keep(
+                    '/shop/product/%s' % slug(product),
+                    page=(pager['page']['num'] if pager['page']['num'] &gt; 1 else None))</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('product_price')]" position="attributes">
+                <attribute name="t-if">not is_rental_page</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('product_price')]" position="after">
+                <b t-if="is_rental_page">
+                    <span class="product_starting_tenure" t-if="product.rental_tenure_id">
+                        <t t-set="unit" t-value="product.rental_tenure_id.rental_uom_id.duration_unit"/>
+                        <t t-set="value" t-value="product.rental_tenure_id.tenure_value"/>
+                        <t t-if="unit=='months' and value==1" t-set="uom_name" t-value="'mo'"/>
+                        <t t-if="unit=='months' and value!=1" t-set="uom_name" t-value="'mo'"/>
+                        <t t-if="unit=='days' and value==1" t-set="uom_name" t-value="'day'"/>
+                        <t t-if="unit=='days' and value!=1" t-set="uom_name" t-value="'days'"/>
+                        <t t-if="unit=='weeks' and value==1" t-set="uom_name" t-value="'week'"/>
+                        <t t-if="unit=='weeks' and value!=1" t-set="uom_name" t-value="'weeks'"/>
+                        <t t-if="unit=='years' and value==1" t-set="uom_name" t-value="'yr'"/>
+                        <t t-if="unit=='years' and value!=1" t-set="uom_name" t-value="'yrs'"/>
+                        <t t-if="unit=='hours' and value==1" t-set="uom_name" t-value="'hr'"/>
+                        <t t-if="unit=='hours' and value!=1" t-set="uom_name" t-value="'hrs'"/>
+                        <t t-if="unit=='minutes' and value==1" t-set="uom_name" t-value="'min'"/>
+                        <t t-if="unit=='minutes' and value!=1" t-set="uom_name" t-value="'mins'"/>
+                        <!-- <span t-out="product.rental_tenure_id.rent_price" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/> -->
+                        <span t-out="website.get_website_price(product,product.rental_tenure_id.rent_price)"
+                              t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                        <span style="color:#000000a6;" t-if="product.rental_tenure_id.tenure_value==1"> per <t
+                                t-out="uom_name"/></span>
+                        <span style="color:#000000a6;" t-else="">for <t
+                                t-out="str(value).rstrip('0').rstrip('.') if '.' in str(value) else str(value)"/>
+                            <t t-out="uom_name"/></span>
+                    </span>
+                    <span itemprop="price" style="display:none;" t-out="product.rental_tenure_id.rent_price"/>
+                    <span itemprop="priceCurrency" style="display:none;" t-out="website.currency_id.name"/>
+                </b>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_products_add_to_cart" inherit_id="website_sale.products_add_to_cart">
+            <xpath expr="//div[hasclass('product_price')]//t[@t-if='len(product.product_variant_ids) &gt; 1']/a"
+                   position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/product/%s' % slug(product), page=(
+                    pager['page']['num'] if pager['page']['num'] &gt; 1 else None)) if is_rental_page else keep(
+                    '/shop/product/%s' % slug(product),
+                    page=(pager['page']['num'] if pager['page']['num'] &gt; 1 else None))</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('product_price')]//t[@t-if='len(product.product_variant_ids) == 1']/a"
+                   position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/product/%s' % slug(product), page=(
+                    pager['page']['num'] if pager['page'][
+                                                'num'] &gt; 1 else None)) if is_rental_page else ''</attribute>
+                <attribute name="class"></attribute>
+                <attribute
+                        name="t-att-class">'btn btn-default btn-xs' if is_rental_page else 'btn btn-default btn-xs a-submit'</attribute>
+            </xpath>
+        </template>
+
+        <template id="standard_rental_product_tenure" name="Rental Product Tenure">
+            <t t-set="uom_name"
+               t-value="request.website._get_rental_tenure_short_name(tenure.rental_uom_id.duration_unit, tenure.tenure_value)"/>
+            <div t-att-class="'col-md-6 tenure_radio-success' if len(rental_product_tenure_ids)>3 else 'col-md-12 tenure_radio-success'"
+                 style="">
+                <input type="radio" name="tenure_id" class="tenure_id"
+                       t-att-id="tenure.id" t-att-value="tenure.id" t-att-checked="1 if i==tenure.id else None"/>
+                <label t-att-for="tenure.id">
+                    <div>
+                        For <t
+                            t-out="str(tenure.tenure_value).rstrip('0').rstrip('.') if '.' in str(tenure.tenure_value) else str(tenure.tenure_value)"/>
+                        <t t-out="uom_name"/>
+                    </div>
+
+                    <span t-out="website.get_website_price(product,tenure.rent_price)"
+                          style="white-space: nowrap;font-weight:bold;"
+                          class="rent_price text-success"
+                          t-options="{'widget': 'monetary','display_currency': website.currency_id}"/>
+                </label>
+            </div>
+        </template>
+
+        <template id="custom_rental_product_tenure">
+            <t t-set="rental_uom"
+               t-value="list(set(rental_product_tenure_ids.mapped(lambda u: u.rental_uom_id.duration_unit)))"/>
+            <t t-set="rental_uom" t-value="request.env['uom.uom'].search([('duration_unit', 'in', rental_uom)])"/>
+            <t t-set="def_val" t-value="rental_product_tenure_ids.filtered(lambda t : t.id==i).tenure_value"/>
+            <t t-set="i" t-value="rental_product_tenure_ids.filtered(lambda t : t.id==i).rental_uom_id.id"/>
+            <div class="container-fluid mt8" t-att-style="'padding:2% 16%;' if renew else 'height: 160px;'">
+                <div class="row text-muted ml8" style="font-size: 0.875rem;">
+                    Choose tenure to know the price...
+                </div>
+                <div class="mt8 mb8" style="padding:0px;padding-left:5px;padding-right:5px;">
+                    <div class="col-md-12" style="padding:5px;">
+                        <input type="number" placeholder="1,2,3.." step="1" min="1"
+                               t-att-value="str(def_val).rstrip('0').rstrip('.') if '.' in str(def_val) else str(def_val)"
+                               class="form-control" name="tenure_value" id="tenure_value"
+                               t-att-max="product.get_tenure_maxvalue(i) or 1"/>
+                    </div>
+                    <div class="col-md-12" style="padding:5px;">
+                        <select class="form-control" name="tenure_uom" id="tenure_uom">
+                            <option value="" disabled="1">--Select--</option>
+                            <t t-foreach="rental_uom" t-as="uom">
+                                <option t-att-selected="'1' if uom.id == i else None" t-att-value="uom.id"><span
+                                        t-out="uom.name"/></option>
+                            </t>
+                        </select>
+                    </div>
+                </div>
+                <div class="row error_content ml16 mb8" style="color:#a94447;font-size: 0.875rem;">
+                </div>
+            </div>
+        </template>
+
+        <template id="rental_product_price" name="Rental Product Price">
+            <t t-if="product.tenure_type_standard or product.tenure_type_custom">
+                <div t-if="is_rental_product">
+                    <div class="rental_loader" style="display:none;"/>
+                    <h4 t-att-class="'d-none' if renew else ''" style="margin-bottom:0px;"
+                        t-if="website.get_website_price(product,product.security_amount)>0">Security Amount:
+                        <span t-att-class="'d-none' if renew else ''"
+                              t-out="website.get_website_price(product,product.security_amount)"
+                              style="white-space: nowrap;color:#188C1D;"
+                              t-options="{'widget': 'monetary','display_currency': website.currency_id, }"/></h4>
+                    <span t-att-class="'d-none' if renew else ''"
+                          class="text-muted" style="font-size:11px;"><i>(Refundable Amount to be paid now)</i></span>
+                    <t t-set="rental_product_tenure_ids"
+                       t-value="product.rental_tenure_ids.filtered(lambda p: p.is_default == True)[::-1]"/>
+                    <div class="alert alert-info mt8 text-center"
+                         style="    padding: 5px;margin-bottom: 0px;border-radius: 0px;font-weight: bold;font-size: 0.875rem;">
+                        Select Tenure </div>
+                    <div t-if="rental_product_tenure_ids" class=""
+                         style="border:1px solid #e9e9e9;box-shadow: 0px 0px 1.96px 0.04px rgba(0,0,0,0.16);">
+                        <ul class="nav nav-pills nav-justified " style="border-radius:0px;background-color:#f5f5f5;">
+                            <li t-if="product.tenure_type_standard" id="standard_tab_li" class="nav-item">
+                                <a class="nav-link active show" data-toggle="tab" href="#standard_tab"
+                                   style="border-radius:0px;font-weight:bold;font-size: 0.875rem;">
+                                    <span style="text-transform: uppercase;">Standard</span>
+                                </a>
+                            </li>
+                            <li t-if="product.tenure_type_custom" id="custom_tab_li"
+                                t-att-class="'nav-item active show' if product.tenure_type_standard==False else 'nav-item '">
+                                <a class="nav-link" data-toggle="tab" href="#custom_tab"
+                                   style="border-radius:0px;font-weight:bold;font-size: 0.875rem;">
+                                    <span style="text-transform: uppercase;">Customize</span>
+                                </a></li>
+                        </ul>
+                        <t t-if="product.rental_tenure_id" t-set="i" t-value="product.rental_tenure_id.id"/>
+                        <t t-else="" t-set="i" t-value="rental_product_tenure_ids[0].id"/>
+                        <div class="tab-content" style="">
+                            <div t-if="product.tenure_type_standard" id="standard_tab" class="tab-pane active show">
+                                <input type="checkbox" id="standard" name="standard" value="1" checked="1"
+                                       style="display:none;"/>
+                                <div class="row mt4 mb4 tenure_radio ml0 mr0"
+                                     t-att-style="'padding:2%;height: 160px;overflow-y: auto;' if not renew else 'padding:2px;'">
+                                    <!-- two loops so that the selected option always comes at first position -->
+                                    <t t-foreach="rental_product_tenure_ids" t-as="tenure">
+                                        <t t-if="tenure.id == i">
+                                            <t t-call="businesssuite_ecommerce_rental.standard_rental_product_tenure"/>
+                                        </t>
+                                    </t>
+                                    <t t-foreach="rental_product_tenure_ids" t-as="tenure">
+                                        <t t-if="tenure.id != i">
+                                            <t t-call="businesssuite_ecommerce_rental.standard_rental_product_tenure"/>
+                                        </t>
+                                    </t>
+                                </div>
+                            </div>
+                            <div t-if="product.tenure_type_custom" id="custom_tab"
+                                 t-att-class="'tab-pane active show' if product.tenure_type_standard==False else 'tab-pane fade'">
+                                <input type="checkbox" id="custom" name="custom" value="1" style="display:none;"
+                                       t-att-checked="1 if not product.tenure_type_standard else None"/>
+                                <t t-call="businesssuite_ecommerce_rental.custom_rental_product_tenure"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-if="rental_product_tenure_ids" class="container" style="padding:0px;">
+                        <center>
+                            <h3 class="alert alert-info mb16" style="margin:0px;padding:6px;border-radius:0px;">
+                                <span t-if="website.currency_id.position=='before'">
+                                    <span t-field="website.currency_id.symbol"/>
+                                </span>
+                                <input type="text" value="" name="custom_tenure_price" id="custom_tenure_price"
+                                       readonly="1" style="display:none;"/>
+                                <t t-set="rental_tenure" t-value="request.env['product.rental.tenure'].browse(i)"/>
+                                <t t-if="rental_product_tenure_ids and product.tenure_type_standard">
+                                    <span id="check_tenure_price"
+                                          t-out="str('%.2f' % round(website.get_website_price(product,rental_tenure.rent_price), 2))"
+                                          style="white-space: nowrap;"/>
+                                </t>
+                                <t t-if="rental_product_tenure_ids and not product.tenure_type_standard">
+                                    <span id="check_tenure_price">
+                                        <t t-out="str('%.2f' % round(product.get_product_tenure_price(website.get_website_price(product,rental_tenure.tenure_value) , rental_tenure.rental_uom_id.id)[1], 2))"/>
+                                    </span>
+                                </t>
+                                <span t-if="website.currency_id.position=='after'">
+                                    <span t-field="website.currency_id.symbol"/>
+                                </span>
+                            </h3>
+                        </center>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="rental_inherit_product_price" inherit_id="website_sale.product_price">
+            <xpath expr="div[hasclass('product_price')]" position="attributes">
+                <attribute name="t-if">not is_rental_product</attribute>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_product" inherit_id="website_sale.product" name="Rental Product">
+            <xpath expr="//ol[hasclass('breadcrumb')]//a[@t-att-href='keep(category=0)']" position="attributes">
+                <attribute name="t-att-href">'/shop/rental' if is_rental_product else keep(category=0)</attribute>
+            </xpath>
+            <xpath expr="//ol[hasclass('breadcrumb')]//a[@t-field='category.name']" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/category/%s' % slug(category),
+                                                  category=0) if is_rental_product else keep(
+                    '/shop/category/%s' % slug(category), category=0)</attribute>
+            </xpath>
+            <xpath expr="//form[@action='/shop/cart/update']" position="inside">
+                <input type="hidden" name="is_rental_product"
+                       t-att-value="is_rental_product if is_rental_product else None"/>
+            </xpath>
+            <!-- New Update -->
+            <xpath expr="//form[@action='/shop/cart/update']" position="after">
+                <div t-if="product.rental_ok and not is_rental_product" class="mt16 mb8">
+                    <a class="text-success" t-att-href="'/shop/rental/product/%s' % slug(product)"
+                       title="Click to View Rental Scheme"
+                       style="text-decoration:underline;font-weight:bold;font-size:15px;">
+                        Product also Available for Rent
+                    </a>
+                </div>
+            </xpath>
+
+            <!-- Rental Description -->
+
+            <xpath expr="//p[@t-field='product.description_sale']" position="after">
+                <p t-if="is_rental_product" t-field="product.description_rental" class="text-muted mt8"/>
+
+            </xpath>
+            <xpath expr="//div[@id='o_product_terms_and_share']" position="before">
+                <p t-if="is_rental_product and product.sudo().rental_agreement_id.agreement_file">
+                    <a target="_blank"
+                       t-attf-href="/web/content?model=rental.product.agreement&amp;field=agreement_file&amp;filename_field=filename&amp;id={{ product.sudo().rental_agreement_id.id }}"
+                       title="Click to view product agreement">
+                        View Product Agreement
+                    </a>
+                </p>
+            </xpath>
+            <xpath expr="//a[@id='add_to_cart']" position="before">
+                <t t-call="businesssuite_ecommerce_rental.rental_inherit_product_price"/>
+            </xpath>
+            <xpath expr="//a[@id='add_to_cart']" position="attributes">
+                <attribute
+                        name="t-att-class">'btn btn-primary btn-group-justified btn-lg mt8 js_check_product a-submit' if is_rental_product else 'btn btn-primary btn-lg mt8 js_check_product a-submit'</attribute>
+                <attribute name="t-att-style">'border-radius:0px;width:100%;' if is_rental_product else ''</attribute>
+                <attribute
+                        name="t-if">not is_rental_product or product.rental_tenure_ids and product.rental_tenure_ids.filtered(
+                    lambda p: p.is_default == True)</attribute>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_products_description" inherit_id="website_sale.products_description">
+            <xpath expr="//div[hasclass('oe_subdescription')]" position="attributes">
+                <attribute name="t-if">not is_rental_page</attribute>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_subdescription')]" position="after">
+                <div t-if="is_rental_page" class="text-info oe_subdescription" contenteditable="false">
+                    <div itemprop="description" t-field="product.description_rental"></div>
+                </div>
+            </xpath>
+        </template>
+
+        <!-- New Update -->
+
+        <template id="rental_inherit_search" inherit_id="website_sale.search" name="Search Box">
+            <xpath expr="//t[@t-call='website.website_search_box_input']" position="replace">
+                <t t-call="website.website_search_box_input">
+                    <t t-set="_form_classes" t-valuef="o_wsale_products_searchbar_form w-100 w-md-auto mr-auto mb-2"/>
+                    <t t-set="_classes" t-valuef=" "/>
+                    <t t-set="search_type" t-valuef="products"/>
+                    <t t-set="action"
+                       t-value="keep('/shop'+ ('/rental/category/'+slug(category)) if category else None, rental_categ='%s' % rental_categ.id if rental_categ else 0, search=0) if is_rental_page else keep('/shop'+ ('/category/'+slug(category)) if category else None, search=0)"/>
+
+                    <!-- <t t-set="action" t-value="keep('/shop'+ ('/category/'+slug(category)) if category else None, search=0) or '/shop'"/> -->
+                    <t t-set="display_image" t-valuef="true"/>
+                    <t t-set="display_description" t-valuef="true"/>
+                    <t t-set="display_extra_link" t-valuef="true"/>
+                    <t t-set="display_detail" t-valuef="true"/>
+                    <t t-if="attrib_values">
+                        <t t-foreach="attrib_values" t-as="a">
+                            <input type="hidden" name="attrib" t-att-value="'%s-%s' % (a[0], a[1])"/>
+                        </t>
+                    </t>
+                </t>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_sort" inherit_id="website_sale.sort">
+            <xpath expr="//a[hasclass('dropdown-item')]" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental', order=sortby[1]) if is_rental_page else keep('/shop',
+                                                                                                               order=
+                                                                                                               sortby[
+                                                                                                                   1])</attribute>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_products_categories" inherit_id="website_sale.products_categories">
+            <xpath expr="//div[@id='products_grid_before']//ul//li[1]/div" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental', category=0) if is_rental_page else keep('/shop',
+                                                                                                          category=0)</attribute>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_categories_recursive" inherit_id="website_sale.categories_recursive">
+            <xpath expr="//li" position="attributes">
+                <attribute
+                        name="t-att-style">'display:none;' if is_rental_page and categ_domain and c.id not in categ_domain else ''</attribute>
+            </xpath>
+            <!-- <xpath expr="//li" position="after">
+                <span>gggggg</span>
+                <spen t-out="is_rental_page"/>
+            </xpath> -->
+        </template>
+
+        <template id="rental_inherit_categorie_link" inherit_id="website_sale.categorie_link">
+            <xpath expr="//t[@t-name='website_sale.categorie_link']/div" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/category/' + slug(c),
+                                                  category=0) if is_rental_page else keep('/shop/category/' + slug(c),
+                                                                                          category=0)</attribute>
+            </xpath>
+        </template>
+
+        <template id="rental_inherit_option_collapse_categories_recursive"
+                  inherit_id="website_sale.option_collapse_categories_recursive">
+            <!-- <xpath expr="//li//a[@t-field='c.name']" position="attributes">
+                <attribute name="t-att-href">keep('/shop/rental/category/' + slug(c), category=0) if is_rental_page else keep('/shop/category/' + slug(c), category=0)</attribute>
+            </xpath> -->
+            <xpath expr="//li" position="attributes">
+                <attribute
+                        name="t-att-style">'display:none;' if is_rental_page and categ_domain and c.id not in categ_domain else ''</attribute>
+            </xpath>
+        </template>
+    </data>
+</odoo>

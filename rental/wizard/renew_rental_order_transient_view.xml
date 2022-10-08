@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="renew_rental_order_wizard_view_form" model="ir.ui.view">
+        <field name="name">Renew Rental Order Wizard</field>
+        <field name="model">rental.order.renew.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group col="4">
+                    <field name="rental_customer_id" context="{'show_address': 1}" options="{'always_reload': True}"/>
+                    <field name="rental_product_id" placeholder="Rental Product" required="1"/>
+                    <field name="sale_order_line_id" invisible="1"/>
+                    <field name="product_rental_agreement_id" options="{'no_open':True, 'no_create':True}"/>
+                </group>
+                <group>
+                    <field name="rental_qty" placeholder="Quantity" required="1" readonly="1"/>
+                    <field name="rental_tenure_type" widget="radio" options="{'horizontal': true}" string="Tenure Type"
+                           required="1"/>
+                    <field name="rental_tenure_ids_domain" invisible="1"/>
+                    <field name="rental_tenure_id" placeholder="Rental Tenure"
+                           attrs="{'required':[('rental_tenure_type','=', 'standard')]}"
+                           domain="[('id','in',rental_tenure_ids_domain)]"
+                           options="{'horizontal': true}" string="Rental Scheme" widget="radio"/>
+                    <label for="rental_tenure" attrs="{'invisible':[('rental_tenure_type','=', 'standard')]}"/>
+                    <div class="oe_inline" style="display:flex;">
+                        <span>
+                            <field name="rental_tenure" required="1"
+                                   attrs="{'invisible':[('rental_tenure_type','=', 'standard')]}"/>
+                        </span>
+                        <span style="margin-left: 10px; font-weight: 600;">
+                            <!-- <field name="duration_unit" required="1" attrs="{'invisible':[('rental_tenure_type','=', 'standard')]}"/> -->
+                            <field name="rental_uom_ids_domain" invisible="1"/>
+                            <field name="rental_uom_id" options="{'no_create' : True}" required="1"
+                                   domain="[('id','in',rental_uom_ids_domain)]"
+                                   attrs="{'invisible':[('rental_tenure_type','=', 'standard')]}"/>
+                        </span>
+                    </div>
+                </group>
+                <footer>
+                    <button name="action_create_rental_contract" string="Renew" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="renew_rental_order_wizard_action" model="ir.actions.act_window">
+        <field name="name">Renew Rental Order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.order.renew.wizard</field>
+        <field name="binding_view_types">form</field>
+        <field name="target">new</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="renew_rental_order_wizard_view_form"/>
+    </record>
+</odoo>

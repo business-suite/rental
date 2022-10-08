@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="inherited_sale_order_view_form_rental_sale" model="ir.ui.view">
+        <field name="name">sale.order</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook/page/field[@name='order_line']" position="before">
+                <button name="%(businesssuite_rental.rental_order_wizard_action)d" string="Add Rental Product"
+                        type="action" class="oe_highlight mt8 mb8"/>
+            </xpath>
+            <xpath expr="//group[hasclass('oe_subtotal_footer')]" position="after">
+                <field name="is_rental_so" invisible="1"/>
+                <group class="oe_subtotal_footer oe_right" attrs="{'invisible' : [('is_rental_so', '=', False)]}">
+                    <field name="total_deposit_security_amount" widget="monetary"
+                           options="{'currency_field': 'currency_id'}"/>
+                </group>
+            </xpath>
+            <xpath expr="//notebook//form//field[@name='tax_id']" position="after">
+                <field name="rental_tenure"
+                       attrs="{'readonly': [('is_rental_order', '=', True)], 'invisible': [('is_rental_order', '=', False)]}"/>
+                <field name="rental_uom_id"
+                       attrs="{'readonly': [('is_rental_order', '=', True)], 'invisible': [('is_rental_order', '=', False)]}"/>
+                <field name="unit_security_amount"
+                       attrs="{'readonly': [('is_rental_order', '=', True)], 'invisible': [('is_rental_order', '=', False)]}"/>
+                <field name="is_rental_order" readonly="1" string="Rental Order"/>
+            </xpath>
+            <xpath expr="//notebook//form//field[@name='product_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//notebook//form//field[@name='product_uom_qty']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//notebook//form//field[@name='product_uom']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//notebook//form//field[@name='price_unit']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+
+            <xpath expr="//tree" position="inside">
+                <field name="is_rental_order" readonly="1" string="Rental Order"/>
+            </xpath>
+
+            <xpath expr="//tree/field[@name='tax_id']" position="after">
+                <field name="rental_tenure" readonly="1"/>
+                <field name="rental_uom_id" readonly="1"/>
+                <field name="unit_security_amount" readonly="1" required="0"/>
+                <field name="is_rental_order" invisible="1"/>
+            </xpath>
+            <xpath expr="//tree/field[@name='product_id']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//tree/field[@name='product_uom_qty']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//tree/field[@name='product_uom']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+            <xpath expr="//tree/field[@name='price_unit']" position="attributes">
+                <attribute name="attrs">{'readonly': [('is_rental_order', '=', True)]}</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

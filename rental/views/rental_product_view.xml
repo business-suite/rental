@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- views and menus -->
+    <record id="inherit_rental_product_template_view_form" model="ir.ui.view">
+        <field name="name">rental.product.template.common.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='options']" position="inside">
+                <span>
+                    <field name="rental_ok"/>
+                    <label for="rental_ok" class="o_form_label"/>
+                </span>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Rental" name="rent" attrs="{'invisible':[('rental_ok','=',False)]}">
+                    <group>
+                        <group>
+                            <field name="rental_categ_id" attrs="{'required':[('rental_ok','=',True)]}"/>
+                            <field name="security_amount" attrs="{'required':[('rental_ok','=',True)]}"
+                                   widget="monetary"/>
+                        </group>
+                        <group>
+                            <field name="rental_agreement_id" attrs="{'required':[('rental_ok','=',True)]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <label class="o_form_label" for="tenure_type_standard" string="Rental Tenure Type"/>
+                            <div class="oe_inline">
+                                <field name="tenure_type_standard"/>
+                                <label class="o_form_label" for="tenure_type_standard"/>
+                                <br/>
+                                <field name="tenure_type_custom"/>
+                                <label class="o_form_label" for="tenure_type_custom"/>
+                            </div>
+                        </group>
+                        <group name="tenure_type_msg">
+                            <div>
+                                <ul>
+                                    <li class="text-muted"
+                                        attrs="{'invisible' :  [('tenure_type_standard', '=', False)]}">
+                                        Only standard tenure will be visible on website to the customer.
+                                    </li>
+                                    <li attrs="{'invisible' :  [('tenure_type_custom', '=', False)]}">
+                                        Custom Tenure will also be Visible on website with standard tenure to the
+                                        customer.
+                                    </li>
+                                    <li>
+                                        To calculate custom tenure you have to create 1 unit tenure price for each
+                                        tenure UOM.
+                                    </li>
+                                </ul>
+                            </div>
+                        </group>
+                    </group>
+                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                        <label for="rental_tenure_ids"/>
+                    </div>
+                    <field name="rental_tenure_ids">
+                        <tree editable="bottom">
+                            <field name="tenure_value" string="Tenure"/>
+                            <field name="rental_uom_id" options="{'no_create' : True}"/>
+                            <field name="rent_price" widget="monetary"/>
+                            <!-- <field name="is_default"/> -->
+                            <!-- <field name="max_tenure_value" attrs="{'readonly' : [('rental_tenure_type', '=', 'standard')]}"/> -->
+                            <field name="currency_id" invisible="1"/>
+                            <!-- <field name="rental_tenure_type" invisible="1"/> -->
+                        </tree>
+                    </field>
+                    <group string="Description for Rent">
+                        <field name="description_rental" nolabel="1"
+                               placeholder="This note will show up on sales orders."/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="rental_product_tenure_view_form" model="ir.ui.view">
+        <field name="name">rental.product.tenure.form</field>
+        <field name="model">product.rental.tenure</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="product_tmpl_id"/>
+                            <label for="tenure_value" string="Tenure"/>
+                            <div class="oe_inline" style="display:flex;">
+                                <span>
+                                    <field name="tenure_value" required="1"/>
+                                </span>
+                                <span style="margin-left: 10px; font-weight: 600;">
+                                    <field name="rental_uom_id" options="{'no_create' : True}" required="1"/>
+                                </span>
+                            </div>
+                            <field name="rent_price" widget="monetary"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <!-- <field name="rental_tenure_type" invisible="1"/> -->
+                            <field name="is_default"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="rental_product_agreement_view_form" model="ir.ui.view">
+        <field name="name">rental.product.agreement.form</field>
+        <field name="model">rental.product.agreement</field>
+        <field name="arch" type="xml">
+            <form string="Product Agreement">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="filename" invisible="1"/>
+                            <field name="agreement_file" filename="filename"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <label for="description"/>
+                    <field name="description"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Not in use -->
+    <record id="rental_product_template_view_kanban" model="ir.ui.view">
+        <field name="name">rental.product.template.kanban</field>
+        <field name="model">product.template</field>
+        <field name="arch" type="xml">
+            <kanban quick_create="false" create="true" edit="false">
+                <field name="image_128"/>
+                <field name="list_price"/>
+                <field name="color"/>
+                <field name="rental_categ_id"/>
+                <field name="security_amount"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_color_#{kanban_getcolor(record.color.raw_value)} oe_kanban_card oe_kanban_global_click">
+                            <div class="o_dropdown_kanban dropdown">
+                                <a class="dropdown-toggle btn" data-toggle="dropdown" href="#" title="Manage"
+                                   role='button'>
+                                    <span title="Click" class="fa fa-bars fa-lg"/>
+                                </a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <t t-if="widget.editable">
+                                        <li>
+                                            <a type="edit">Edit Product</a>
+                                        </li>
+                                    </t>
+                                    <li><ul class="oe_kanban_colorpicker" data-field="color"/></li>
+                                </ul>
+                            </div>
+                            <div class="oe_kanban_content oe_kanban_details">
+                                <div id="product_name">
+                                    <a type="open">
+                                        <b><field name="name"/></b>
+                                    </a>
+                                </div>
+                                <div>
+                                    <div class="o_kanban_image">
+                                        <a type="open">
+                                            <img t-att-src="kanban_image('product.template', 'image_128', record.id.raw_value)"
+                                                 alt="Product" class="o_image_64_contain"/>
+                                        </a>
+                                    </div>
+                                    <div name="tags">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="rental_product_template_view_tree" model="ir.ui.view">
+        <field name="name">rental.product.template.tree</field>
+        <field name="model">product.template</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <tree string="Product">
+                <field name="name" string="Product"/>
+                <field name="rental_categ_id"/>
+                <field name="type"/>
+                <field name="qty_available"/>
+                <field name="uom_id" invisible="1"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="rental_product_category_view_tree" model="ir.ui.view">
+        <field name="name">rental.product.category.tree</field>
+        <field name="model">rental.product.category</field>
+        <field name="arch" type="xml">
+            <tree string="Rental Product Category">
+                <field name="name"/>
+                <field name="hide_all_product"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="inherit_rental_product_uom_form_view" model="ir.ui.view">
+        <field name="name">rental.uom.uom.form</field>
+        <field name="model">uom.uom</field>
+        <field name="inherit_id" ref="uom.product_uom_form_view"/>
+        <field name="arch" type="xml">
+            <field name="rounding" position="after">
+                <field name="is_rental_uom"/>
+                <field name="duration_unit"
+                       attrs="{'invisible' :  [('is_rental_uom', '=', False)], 'required' :  [('is_rental_uom', '=', True)]}"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="inherit_rental_product_uom_tree_view" model="ir.ui.view">
+        <field name="name">rental.uom.uom.tree</field>
+        <field name="model">uom.uom</field>
+        <field name="inherit_id" ref="uom.product_uom_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="uom_type" position="after">
+                <field name="is_rental_uom"/>
+                <field name="duration_unit"
+                       attrs="{'invisible' :  [('is_rental_uom', '=', False)], 'required' :  [('is_rental_uom', '=', True)]}"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Search view -->
+    <record id="rental_product_uom_search_view" model="ir.ui.view">
+        <field name="name">rental.uom.uom.search</field>
+        <field name="model">uom.uom</field>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <search string="Search Products">
+                <field name="name"/>
+                <filter string="Rental UOM" name="rental_uom" domain="[('is_rental_uom', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="rental_product_template_search_view" model="ir.ui.view">
+        <field name="name">product.product.search</field>
+        <field name="model">product.template</field>
+        <field name="priority" eval="100"/>
+        <field name="arch" type="xml">
+            <search string="Search Products">
+                <field name="name" string="Product"
+                       filter_domain="['|','|',('default_code','ilike',self),('name','ilike',self),('barcode','ilike',self)]"/>
+                <field name="categ_id" filter_domain="[('categ_id', 'child_of', raw_value)]"/>
+                <field name="rental_categ_id" filter_domain="[('rental_categ_id', '=', self)]"/>
+                <field name="type"/>
+                <field name="list_price"/>
+                <field name="qty_available"/>
+                <field name="location_id" widget="selection" context="{'location': self}"/>
+                <field name="warehouse_id" widget="selection" context="{'warehouse': self}"/>
+                <separator/>
+                <!-- <filter string="Published" name="published" domain="[('is_published', '=', True)]"/>
+                <filter string="Unpublished" name="unpublished" domain="[('is_published', '=', False)]"/> -->
+                <separator/>
+                <field string="Attributes" name="attribute_line_ids" groups="product.group_product_variant"/>
+                <field name="pricelist_id" widget="selection" context="{'pricelist': self}" filter_domain="[]"
+                       groups="product.group_sale_pricelist"/>
+                <separator/>
+                <filter name="real_stock_available" string="Available Products" domain="[('qty_available','&gt;',0)]"/>
+                <filter name="real_stock_exhausted" string="Exhausted Stock"
+                        domain="[('qty_available','&lt;=',0),('type','not in',('service', 'consu'))]"/>
+                <filter name="real_stock_negative" string="Negative Stock" domain="[('qty_available','&lt;',0)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="rental_product_template_kanban_view" model="ir.ui.view">
+        <field name="name">Product Template Kanban Rental</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <field name="list_price" position="after">
+                <field name="rental_ok" invisible="1"/>
+                <field name="rental_categ_id" invisible="1"/>
+                <field name="security_amount" invisible="1"/>
+                <field name="currency_id" invisible="1"/>
+            </field>
+            <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
+                <div attrs="{'invisible' : [('rental_ok', '=', False)]}" class="mt-1">
+                    Rental: <b style="color:green"> Yes </b><br/>
+                    Security Amount: <b><field name="security_amount" widget="monetary"/></b><br/>
+                    Rental Category: <b><field name="rental_categ_id"/></b>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- actions -->
+    <record id="rental_product_template_action" model="ir.actions.act_window">
+        <field name="name">Rental Products</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.template</field>
+        <field name="binding_view_types">form</field>
+        <field name="domain">[('rental_ok', '=', True)]</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'default_rental_ok': True, 'default_purchase_ok': False}</field>
+        <field name="search_view_id" ref="rental_product_template_search_view"/>
+        <field
+                name="view_ids"
+                eval="[(5, 0, 0),
+                (0, 0, {'sequence': 1, 'view_mode': 'kanban','view_id': ref('product.product_template_kanban_view')}),
+                (0, 0, {'sequence': 2, 'view_mode': 'tree', 'view_id': ref('rental_product_template_view_tree')}),
+                (0, 0, {'sequence': 3, 'view_mode': 'form', 'view_id': ref('product.product_template_only_form_view')})
+            ]"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to define a new Rental product.
+            </p>
+        </field>
+    </record>
+
+    <record id="rental_product_category_view_form" model="ir.ui.view">
+        <field name="name">rental.product.category.form</field>
+        <field name="model">rental.product.category</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="%(rental_product_template_action)d" icon="fa-th-list"
+                                type="action" context="{'search_default_rental_categ_id': active_id}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="product_count"/>
+                                </span>
+                                <span class="o_stat_text"> Rental Products</span>
+                            </div>
+                        </button>
+                    </div>
+                    <field name="image" widget="image" nolabel="1" class="oe_inline oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" string="Rental Category Name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Cloths"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="hide_all_product"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="rental_product_product_action" model="ir.actions.act_window">
+        <field name="name">Rental Product Variants</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.product</field>
+        <field name="binding_view_types">form</field>
+        <field name="domain">[('rental_ok', '=', True)]</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="context">{'default_rental_ok': True, 'default_purchase_ok': False}</field>
+        <field name="search_view_id" ref="rental_product_template_search_view"/>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'sequence': 1, 'view_mode': 'kanban','view_id': ref('product.product_template_kanban_view')}),
+            (0, 0, {'sequence': 2, 'view_mode': 'tree', 'view_id': ref('rental_product_template_view_tree')}),
+            (0, 0, {'sequence': 3, 'view_mode': 'form', 'view_id': ref('product.product_template_only_form_view')})
+        ]"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to define a new Rental product.
+            </p>
+        </field>
+    </record>
+
+    <record id="rental_product_agreement_action" model="ir.actions.act_window">
+        <field name="name">Product Agreement</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.product.agreement</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="rental_uom_action" model="ir.actions.act_window">
+        <field name="name">Rental Unit Of Measure</field>
+        <field name="res_model">uom.uom</field>
+        <field name="context">{'search_default_rental_uom': 1, 'default_is_rental_uom': True}</field>
+        <!--suppress PyUnresolvedReferences -->
+        <field name="domain" eval="[('category_id', '=', ref('businesssuite_rental.rental_tenure_uom_categ'))]"/>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="rental_product_category_action" model="ir.actions.act_window">
+        <field name="name">Rental Categories</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.product.category</field>
+        <field name="binding_view_types">form</field>
+        <field name="view_mode">tree,form</field>
+        <!-- <field name="search_view_id" ref="product_category_search_view"/> -->
+        <!-- <field name="view_id" ref="product_category_list_view"/> -->
+    </record>
+</odoo>

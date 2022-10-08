@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="inherited_stock_picking_view_form_rental_sale" model="ir.ui.view">
+        <field name="name">stock.picking.inherit.rental</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="after">
+                <field name="is_rental_picking" invisible="1"/>
+                <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                     attrs="{'invisible': [('is_rental_picking','=', False)]}">
+                    <center>This picking is related to rental sale.</center>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

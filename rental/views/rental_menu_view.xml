@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu -->
+    <menuitem id="odoo_rental_menu_root" name="Rental" sequence="8" groups="sales_team.group_sale_salesman"
+              web_icon="odoo_sale_rental,static/description/icon.png"/>
+    <menuitem id="rental_sales_menu_1" name="Rental Sales" parent="businesssuite_rental.odoo_rental_menu_root"
+              sequence="10"/>
+    <menuitem id="rental_sales_submenu_1" name="Sales Orders" parent="businesssuite_rental.rental_sales_menu_1"
+              action="businesssuite_rental.rental_sale_order_action" sequence="10"
+              groups="sales_team.group_sale_salesman"/>
+    <menuitem id="rental_sales_submenu_2" name="Rental Orders" parent="businesssuite_rental.rental_sales_menu_1"
+              action="rental_sol_action" sequence="10" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="rental_sales_submenu_3" name="Rental Contract" parent="businesssuite_rental.rental_sales_menu_1"
+              action="rental_contract_action" sequence="10" groups="sales_team.group_sale_salesman"/>
+
+    <menuitem id="rental_product_menu_1" name="Rental Products" parent="businesssuite_rental.odoo_rental_menu_root"
+              sequence="10" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="rental_product_submenu_1" name="Rental Products" parent="businesssuite_rental.rental_product_menu_1"
+              action="rental_product_template_action" sequence="10" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="rental_product_submenu_2" name="Rental Products Variants"
+              parent="businesssuite_rental.rental_product_menu_1" action="rental_product_product_action" sequence="10"
+              groups="product.group_product_variant"/>
+
+    <menuitem id="odoo_rental_configuration_menu" name="Configuration" parent="odoo_rental_menu_root" sequence="100"
+              groups="sales_team.group_sale_salesman"/>
+    <menuitem id="odoo_rental_setting_menu" name="Settings" parent="businesssuite_rental.odoo_rental_configuration_menu"
+              action="sale.action_sale_config_settings" sequence="1" groups="sales_team.group_sale_manager"/>
+    <menuitem id="odoo_rental_duration_menu" name="Unit of Measure (Rental)"
+              parent="businesssuite_rental.odoo_rental_configuration_menu"
+              action="businesssuite_rental.rental_uom_action" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="odoo_rental_category_menu" name="Rental Category"
+              parent="businesssuite_rental.odoo_rental_configuration_menu"
+              action="businesssuite_rental.rental_product_category_action" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="odoo_rental_product_agreement_menu" name="Product Agreements"
+              parent="businesssuite_rental.odoo_rental_configuration_menu"
+              action="businesssuite_rental.rental_product_agreement_action" groups="sales_team.group_sale_salesman"/>
+    <menuitem id="odoo_rental_reasons_menu" name="Rental Reasons"
+              parent="businesssuite_rental.odoo_rental_configuration_menu"
+              action="businesssuite_rental.rental_reasons_action" groups="sales_team.group_sale_salesman"/>
+</odoo>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- views and menus -->
+    <record id="rental_sol_form" model="ir.ui.view">
+        <field name="name">rental.orde.tree.view</field>
+        <field name="model">sale.order.line</field>
+        <field name="priority" eval="50"/>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_renew_rental_order" string="Renew Rental Contract" type="object"
+                            attrs="{'invisible': ['|', ('rental_state', '!=', 'expired'), ('security_refund_invoice_id', '!=', False)]}"
+                            class="oe_highlight" icon="fa-repeat" title="Renew"/>
+                    <!-- <button name="odoo_sale_rental.businesssuite_rental_cancel_reason_wizard_action" string="Cancel" type="action" attrs="{'invisible': [('rental_state', 'not in', ['ordered', 'confirm'])]}"/> -->
+                    <field name="rental_state" widget="statusbar" statusbar_visible=""/>
+                </header>
+                <div class="alert alert-info" role="alert" style="margin-bottom:0px;"
+                     attrs="{'invisible': [('rental_state','!=','ordered')]}">
+                    Corresponding <b>Sales Order</b> is not confirmed yet. Once related <b>Sales Order</b> confirmed,
+                    rental order and rental contract will get confirm automatically.
+                </div>
+                <sheet>
+                    <div class="oe_button_box" name="mp_button_box">
+                        <button name="view_outgoing_delivery_order" type="object" class="oe_stat_button" icon="fa-truck"
+                                attrs="{'invisible':[('out_picking_count','=',0)]}">
+                            <field name="out_picking_count" widget="statinfo" string="Outgoing"/>
+                        </button>
+                        <button name="action_view_invoice" type="object" class="oe_stat_button"
+                                icon="fa-pencil-square-o" attrs="{'invisible': [('rental_invoice_count', '=', 0)]}">
+                            <field name="rental_invoice_count" widget="statinfo" string="Invoices"/>
+                        </button>
+                        <button name="view_return_delivery_order" type="object" class="oe_stat_button"
+                                icon="fa-truck fa-rotate-180 fa-flip-horizontal"
+                                attrs="{'invisible':[('in_picking_count','=',0)]}">
+                            <field name="in_picking_count" widget="statinfo" string="Incoming"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="rental_sequence" nolabel="1" readonly="1"/>
+                        </h1>
+                    </div>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="security_refund_invoice_id" invisible="1"/>
+                    <group>
+                        <group>
+                            <field name="order_partner_id" context="{'show_address': 1}"
+                                   options="{'always_reload': True}"/>
+                            <field name="product_id" readonly="1"/>
+                            <field name="price_unit" readonly="1" string="Product Unit Price" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="unit_security_amount" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="order_id" readonly="1"/>
+                            <field name="company_id" invisible="1"/>
+                        </group>
+                        <group name="rental_sale_total">
+                            <field name="create_date" readonly="1"/>
+                            <field name="price_total_without_tax_security" string="Taxes" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <field name="price_tax" string="Taxes" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                            <label for="total_deposit_security_amount"/>
+                            <div>
+                                <div>
+                                    <field name="total_deposit_security_amount" widget="monetary"
+                                           options="{'currency_field': 'currency_id'}"/>
+                                    <button type="object" name="create_security_refund_invoice"
+                                            string="Create Security Refund Invoice" class="btn-xs btn-link mb4"
+                                            attrs="{'invisible':['|', '|', ('total_deposit_security_amount', '&lt;=', 0.0), ('security_refund_invoice_id', '!=', False), ('rental_state','not in', ['expired', 'closed'])]}"/>
+                                    <button type="object" name="button_view_invoice"
+                                            string="View Security Refund Invoice" class="btn-xs btn-link mb4"
+                                            attrs="{'invisible':[('security_refund_invoice_id', '=', False)]}"/>
+                                </div>
+                            </div>
+                            <field name="price_subtotal_with_tax" widget="monetary"
+                                   options="{'currency_field': 'currency_id'}"/>
+                        </group>
+                        <div class="oe_clear"/>
+                    </group>
+                    <group>
+                        <group string="Initial Rental Details">
+                            <field name="initial_start_time" string="Start Time"/>
+                            <field name="initial_end_time" string="End Time"/>
+                            <field name="product_uom_qty" readonly="1"/>
+                            <label for="rental_tenure"/>
+                            <div class="oe_inline" style="display:flex;">
+                                <span>
+                                    <field name="rental_tenure"/>
+                                </span>
+                                <span style="margin-left: 10px; font-weight: 600;">
+                                    <field name="rental_uom_id" options="{'no_create' : True}"/>
+                                </span>
+                            </div>
+                            <field name="inital_rental_contract_id"/>
+                        </group>
+                        <group string="Current Rental Details"
+                               attrs="{'invisible': [('current_rental_contract_id', '=', False)]}">
+                            <field name="current_start_time" string="Start Time"/>
+                            <field name="current_end_time" string="End Time"/>
+                            <field name="current_rental_qty" string="Quantity"/>
+                            <label for="current_rental_tenure" string="Tenure"/>
+                            <div class="oe_inline" style="display:flex;">
+                                <span>
+                                    <field name="current_rental_tenure"/>
+                                </span>
+                                <span style="margin-left: 10px; font-weight: 600;">
+                                    <field name="current_rental_uom_id" string="Tenure UOM"
+                                           options="{'no_create' : True}"/>
+                                </span>
+                            </div>
+                            <field name="current_rental_contract_id"/>
+                            <field name="last_renewal_time"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Rental Contracts">
+                            <field name="rental_contract_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="product_rental_agreement_id"/>
+                                    <field name="rental_tenure"/>
+                                    <field name="rental_uom_id" string="Unit"/>
+                                    <field name="start_time"/>
+                                    <field name="end_time"/>
+                                    <field name="rental_qty"/>
+                                    <field name="price_unit"/>
+                                    <field name="discount" readonly="1"/>
+                                    <field name="tax_ids" string="Taxes" widget="many2many_tags"/>
+                                    <field name="price_total"/>
+                                    <field name="state"/>
+                                    <field name="sale_order_line_id" invisible="1"/>
+                                    <field name="price_subtotal" invisible="1"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Delivery">
+                            <div>
+                                <span style="float: left;font-weight: bold;padding: 5px;"> Delivery Status </span>
+                                <header>
+                                    <field name="rental_delivery_status" widget="statusbar" statusbar_visible=""/>
+                                </header>
+                            </div>
+                            <field name="move_ids">
+                                <tree>
+                                    <field name="reference"/>
+                                    <field name="location_id"/>
+                                    <field name="location_dest_id"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="origin"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Invoice Lines">
+                            <field name="invoice_lines"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="rental_sol_view_tree" model="ir.ui.view">
+        <field name="name">rental.orde.order.line.tree.view</field>
+        <field name="model">sale.order.line</field>
+        <field name="priority" eval="16"/>
+        <field name="arch" type="xml">
+            <tree create="0" decoration-success="rental_state=='in_progress'" decoration-muted="rental_state=='closed'"
+                  decoration-info="rental_state=='confirm'" decoration-danger="rental_state=='expired'"
+                  decoration-warning="rental_state=='cancel'">
+                <field name="rental_sequence"/>
+                <field name="order_id"/>
+                <field name="order_partner_id"/>
+                <field name="initial_start_time" string="Start Time"/>
+                <field name="initial_end_time" string="End Time"/>
+                <field name="product_id"/>
+                <field name="product_uom_qty"/>
+                <field name="rental_tenure"/>
+                <field name="rental_uom_id"/>
+                <!-- <field name="rental_contract_ids" widget="many2many_tags"/> -->
+                <field name="create_date"/>
+                <field name="rental_state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- actions -->
+    <record id="rental_sale_order_action" model="ir.actions.act_window">
+        <field name="name">Sales Orders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.order</field>
+        <field name="binding_view_types">form</field>
+        <field name="domain">[('is_rental_so', '=', True)]</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="rental_sol_action" model="ir.actions.act_window">
+        <field name="name">Rental Orders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="binding_view_types">form</field>
+        <field name="domain">[('is_rental_order', '=', True)]</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context"></field>
+        <field
+                name="view_ids"
+                eval="[(5, 0, 0),
+                (0, 0, {'sequence': 2, 'view_mode': 'tree', 'view_id': ref('businesssuite_rental.rental_sol_view_tree')}),
+                (0, 0, {'sequence': 3, 'view_mode': 'form', 'view_id': ref('businesssuite_rental.rental_sol_form')})
+            ]"/>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                You can create Rental Order creating and confiming Sale Order.
+            </p>
+        </field>
+    </record>
+
+</odoo>
